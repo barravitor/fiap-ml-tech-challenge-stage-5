@@ -13,7 +13,7 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN export PYTHONPATH=$(pwd)/
+RUN export PYTHONPATH=$(pwd)/api
 
 EXPOSE 8000
 
