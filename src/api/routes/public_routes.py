@@ -2,12 +2,12 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 
 from ..schemas.index_schemas import LoginSchema, TokenSchema, UserRoleSchema, ChatMessageSchema
-from ...shared.db.models.index_models import RecruiterModelDb, CompanyModelDb, UserModelDb
-from ...shared.db.database import get_session_local
+from shared.db.models.index_models import RecruiterModelDb, CompanyModelDb, UserModelDb
+from shared.db.database import get_session_local
 from datetime import datetime, timezone
-from passlib.context import CryptContext
 from shared.utils.jwt_helper import create_jwt_token
 
 public_router = APIRouter()

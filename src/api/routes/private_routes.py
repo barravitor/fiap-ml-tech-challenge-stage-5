@@ -1,15 +1,14 @@
 # api/routes/private_routes.py
+import httpx
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
-import httpx
 from sqlalchemy import desc
-from ..schemas.job_schemas import BasicInformationSchema, ProfileSchema
 from shared.utils.dependencies import get_current_user
-from ...shared.db.models.index_models import JobModelDb
+from shared.db.models.index_models import JobModelDb
 from sqlalchemy.orm import Session
-from ...shared.db.database import get_session_local
-from ..schemas.index_schemas import JobSchema
+from shared.db.database import get_session_local
+from ..schemas.index_schemas import JobSchema, BasicInformationSchema, ProfileSchema
 
 private_router = APIRouter()
 

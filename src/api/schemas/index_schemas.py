@@ -1,4 +1,4 @@
-from .job_schemas import JobSchema
+from .job_schemas import JobSchema, BasicInformationSchema, ProfileSchema
 from ..schemas.token_schemas import TokenSchema
 from .login_schemas import LoginSchema
 from .role_schemas import UserRoleSchema

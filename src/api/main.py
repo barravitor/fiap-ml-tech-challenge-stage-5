@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from .routes.index_routes import router
-from ..shared.db.database import create_table
+from shared.db.database import create_table
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
