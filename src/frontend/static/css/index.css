@@ -1,0 +1,61 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f5f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+}
+
+.card {
+    flex: 1;
+    min-width: 200px;
+    padding: 2rem;
+    border-radius: 1rem;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background-color: #e0f2fe;
+}
+
+.recruiter {
+    border: 2px solid #3b82f6;
+    color: #1d4ed8;
+}
+
+.candidate {
+    border: 2px solid #10b981;
+    color: #047857;
+}
+
+h2 {
+    margin-bottom: 1rem;
+}
+
+p {
+    color: #4b5563;
+}
+
+@media (max-width: 600px) {
+    .container {
+        flex-direction: column;
+    }
+}

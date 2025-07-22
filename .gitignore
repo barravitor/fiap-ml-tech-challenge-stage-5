@@ -1,0 +1,32 @@
+# Ignore project Python configs
+.venv
+.env
+__pycache__
+
+# Ignore models and datasets and extensions
+*.pt
+*.pkl
+*.onnx
+*.h5
+*.joblib
+*.csv
+*.xlsx
+*.ini
+*.log
+*.db
+
+# Ignore folders
+mlruns/
+/data
+processed/
+raw/
+mlartifacts/
+tmp/
+gcp-storage-service-account.json
+
+curriculo1.pdf
+curriculo2.pdf
+gerar-cv.py
+inde.py
+ler-cv.py
+meu_script.py

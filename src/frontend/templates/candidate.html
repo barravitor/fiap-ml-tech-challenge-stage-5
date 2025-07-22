@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Candidate | Jobs</title>
+        <link rel="stylesheet" href="/static/css/candidate.css">
+    </head>
+    <body>
+        <h1>Jobs</h1>
+
+        <div class="job-list" id="job-list">
+            {% if jobs %}
+                {% for job in jobs %}
+                    <div class="job" data-job-id="{{ job.id }}">
+                        <h2>{{job.job_title}}</h2>
+                        <p>{{job.job_title}}</p>
+                        <small>Local: {{job.state}}, {{job.city}}</small>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Nenhuma vaga disponível no momento.</p>
+            {% endif %}
+        </div>
+
+        <script>
+
+            // É uma boa prática esperar o DOM carregar
+            document.addEventListener('DOMContentLoaded', function() {
+                // Obtenha todos os elementos com a classe 'job card'
+                const jobCards = document.querySelectorAll('.job');
+
+                // Itere sobre cada card e adicione um ouvinte de evento
+                jobCards.forEach(card => {
+                    card.addEventListener('click', function() {
+                        // 'this' se refere ao elemento 'div' que foi clicado
+                        const jobId = this.dataset.jobId; // Acesse o valor do data-job-id
+
+                        console.log('Você clicou na vaga com ID:', jobId);
+                        alert('Você clicou na vaga com ID: ' + jobId);
+
+                        // Exemplo: redirecionar
+                        // window.location.href = '/jobs/' + jobId;
+                    });
+                });
+            });
+
+            // async function loadJobs() {
+            //     try {
+            //         const token = localStorage.getItem('token');
+
+            //         const response = await fetch('/api/private/recruiters/jobs', {
+            //             headers: {
+            //                 'Authorization': `Bearer ${token}`
+            //             }
+            //         });
+
+            //         if (!response.ok) {
+            //             throw new Error('Error to load jobs.');
+            //         }
+
+            //         const jobs = await response.json();
+            //         const jobList = document.getElementById('job-list');
+
+            //         if (jobs.length === 0) {
+            //             jobList.innerHTML = '<p>No vacancies found.</p>';
+            //             return;
+            //         }
+
+            //         jobs.forEach(job => {
+            //             const div = document.createElement('div');
+            //             div.classList.add('job');
+            //             div.innerHTML = `
+            //                 <div class="card" style="cursor:pointer">
+            //                     <h2>${job.basicInformation.job_title}</h2>
+            //                     <p>${job.basicInformation.job_title}</p>
+            //                     <small>Local: ${job.profile.state}, ${job.profile.city}</small>
+            //                 </div>
+            //             `;
+
+            //             div.querySelector('.card')
+            //                 .addEventListener('click', () => {
+            //                     window.location.href = `/app/recruiters/jobs/${job.id}`;
+            //                 });
+
+            //             jobList.appendChild(div);
+            //         })
+            //     } catch (err) {
+            //         document.getElementById('job-list').innerHTML = '<p style="color:red;">Error to load jobs.</p>';
+            //     }
+            // }
+
+            // loadJobs()
+        </script>
+    </body>
+</html>

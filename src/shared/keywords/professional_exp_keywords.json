@@ -1,0 +1,34 @@
+{
+    "job_roles": [
+        "desenvolvedor", "engenheiro de software", "analista de sistemas", "cientista de dados", "engenheiro de dados",
+        "analista de dados", "arquiteto de software", "devops", "qa", "analista de testes", "product owner", "scrum master",
+        "gerente de projetos", "coordenador de ti", "tech lead", "engenheiro de machine learning", "consultor de ti",
+        "analista funcional", "analista de suporte", "suporte técnico"
+    ],
+    "sectors_industries": [
+        "fintech", "banco", "telecom", "e-commerce", "indústria", "varejo", "logística", "educação", "saúde",
+        "automotivo", "agronegócio", "energia", "seguradora", "startup", "governo"
+    ],
+    "business_functions": [
+        "faturamento", "crm", "logística", "suprimentos", "financeiro", "controladoria", "contabilidade", "vendas",
+        "recursos humanos", "pagamentos", "compras", "tesouraria", "auditoria", "compliance"
+    ],
+    "responsibilities": [
+        "desenvolvimento", "manutenção", "customização", "implantação", "suporte", "atendimento", "treinamento",
+        "documentação", "integração", "testes", "análise", "gerenciamento de projetos", "levantamento de requisitos",
+        "desenho de soluções", "melhoria contínua"
+    ],
+    "seniority_levels": [
+        "estagiário", "júnior", "pleno", "sênior", "especialista", "coordenador", "gerente", "diretor", "consultor"
+    ],
+    "contract_types": [
+        "clt", "pj", "freelancer", "temporário", "estágio", "terceirizado", "efetivo"
+    ],
+    "methodologies": [
+        "scrum", "kanban", "agile", "waterfall", "lean", "devops", "itil", "cobit", "safe"
+    ],
+    "soft_skills_keywords": [
+        "liderança", "comunicação", "trabalho em equipe", "resolução de problemas", "adaptabilidade",
+        "pensamento crítico", "gestão de tempo", "orientação a resultados", "proatividade"
+    ]
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Create Account</title>
+        <link rel="stylesheet" href="/static/css/style.css">
+    </head>
+    <body>
+        <main class="login-container">
+            <h1 id="login-title">Create Account</h1>
+
+            <form id="login-form">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="your name" required />
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="seu.email@exemplo.com" required />
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="********" required />
+
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="********" required />
+
+                <div class="create-account-msg" id="create-account-msg">Sign In</div>
+
+                <div class="error-message" id="error-msg">Password not match.</div>
+
+                <button type="submit">Sign In</button>
+            </form>
+        </main>
+
+        <script>
+            const params = new URLSearchParams(window.location.search);
+
+            const createAccountDocument = document.getElementById('create-account-msg');
+            createAccountDocument.style.display = 'none';
+
+            const form = document.getElementById('login-form');
+            const errorMsg = document.getElementById('error-msg');
+            
+            const role = String(params.get('role')).toLowerCase();
+
+            if (role === 'candidate') {
+                createAccountDocument.style.display = 'block';
+
+                createAccountDocument.addEventListener('click', () => {
+                    window.location.href = `/app/login?role=${role}`;
+                });
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault()
+                errorMsg.style.display = 'none';
+
+                const name = form['name'].value;
+                const email = form['email'].value;
+                const password = form['password'].value;
+                const confirmPassword = form['confirm-password'].value;
+
+                console.log('name', name)
+                console.log('email', email)
+                console.log('password', password)
+                console.log('confirmPassword', confirmPassword)
+
+
+                // try {
+                //     if (!['recruiter', 'candidate'].includes(role)) {
+                //         throw new Error('Wrong role level');
+                //     }
+
+                //     const response = await fetch('/api/public/auth/login', {
+                //         method: 'POST',
+                //         headers: {
+                //             'Content-Type': 'application/json'
+                //         },
+                //         body: JSON.stringify({
+                //             email,
+                //             password,
+                //             role
+                //         })
+                //     });
+
+                //     const data = await response.json();
+
+                //     if (!response.ok) {
+                //         throw new Error(typeof data.detail === "string" ? data.detail : 'Error on login')
+                //     }
+
+                //     localStorage.setItem('token', data.access_token);
+
+                //     window.location.href = `/app/${role}s/jobs`;
+                // } catch (err) {
+                //     errorMsg.textContent = err.message;
+                //     errorMsg.style.display = 'block';
+                // }
+            })
+        </script>
+    </body>
+</html>
