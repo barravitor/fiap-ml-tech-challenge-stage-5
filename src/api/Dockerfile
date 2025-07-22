@@ -17,4 +17,4 @@ RUN export PYTHONPATH=$(pwd)/src
 
 EXPOSE 8000
 
-CMD ["/app/src/api/start_api.sh"]
+CMD ["./src/api/start_api.sh"]
