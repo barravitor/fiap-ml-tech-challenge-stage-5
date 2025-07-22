@@ -9,10 +9,10 @@ COPY /requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY /src/api /app/api
-COPY /src/api/start_api.sh /app/api/start_api.sh
-COPY /src/shared /app/shared
+COPY /src/api /app/src/api
+COPY /src/api/start_api.sh /app/src/api/start_api.sh
+COPY /src/shared /app/src/shared
 
 EXPOSE 8000
 
-CMD ["./start_api.sh"]
+CMD ["/app/src/api/start_api.sh"]
