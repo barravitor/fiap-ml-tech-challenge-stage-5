@@ -12,7 +12,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # Copy the code and configuration files
 WORKDIR /app
 COPY /requirements.txt /app/requirements.txt
-COPY /src/mlflow_server /app/src/mlflow_server
+COPY /src/mlflow_server /app/mlflow_server
 
 # Install mlflow and other Python libs
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
