@@ -21,19 +21,19 @@ COPY requirements.txt ./requirements.txt
 # Install mlflow and other Python libs
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-# # Copy the nginx password and config file to where nginx expects it
-# COPY src/mlflow_server/.htpasswd /etc/nginx/.htpasswd
-# COPY src/mlflow_server/nginx.conf /etc/nginx/sites-enabled/default
+# Copy the nginx password and config file to where nginx expects it
+COPY src/mlflow_server/.htpasswd /etc/nginx/.htpasswd
+COPY src/mlflow_server/nginx.conf /etc/nginx/sites-enabled/default
 
-# # Copy the supervisord.conf file to the expected location
-# COPY src/mlflow_server/supervisord.conf /etc/supervisor/supervisord.conf
+# Copy the supervisord.conf file to the expected location
+COPY src/mlflow_server/supervisord.conf /etc/supervisor/supervisord.conf
 
-# # Expose port 80 (nginx)
-# EXPOSE 80
+# Expose port 80 (nginx)
+EXPOSE 80
 
-# # Run supervisor to manage nginx + mlflow
-# CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+# Run supervisor to manage nginx + mlflow
+CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
 
-EXPOSE 5000
-CMD ["./start_mlflow.sh"]
+# EXPOSE 5000
+# CMD ["./start_mlflow.sh"]
 
