@@ -23,6 +23,7 @@ raw/
 mlartifacts/
 tmp/
 gcp-storage-service-account.json
+src/mlflow_server/data
 
 curriculo1.pdf
 curriculo2.pdf
