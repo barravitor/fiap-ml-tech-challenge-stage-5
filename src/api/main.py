@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from .routes.index_routes import router
+from .routes.app_routes import app_router
+from .routes.public_routes import public_router
+from .routes.private_routes import private_router
 from shared.db.database import create_table
 
 @asynccontextmanager
@@ -44,7 +46,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
 app.mount("/static", StaticFiles(directory=os.path.join(FRONTEND_DIR, 'static')), name="static")
 
-app.include_router(router)
+app.include_router(public_router, prefix="/api/public", tags=["API Public Routes"])
+app.include_router(private_router, prefix="/api/private", tags=["API Private Routes"])
+app.include_router(app_router, prefix="/app", tags=["App Routes"])
 
 @app.get("/")
 def read_root():
