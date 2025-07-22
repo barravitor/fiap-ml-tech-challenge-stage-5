@@ -11,18 +11,19 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # Copy the code and configuration files
 WORKDIR /app
-COPY /src/mlflow_server /app
-COPY /requirements.txt /app/requirements.txt
+
+COPY src/mlflow_server ./
+COPY requirements.txt ./requirements.txt
 
 # Install mlflow and other Python libs
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy the nginx password and config file to where nginx expects it
-COPY /src/mlflow_server/.htpasswd /etc/nginx/.htpasswd
-COPY /src/mlflow_server/nginx.conf /etc/nginx/sites-enabled/default
+COPY src/mlflow_server/.htpasswd /etc/nginx/.htpasswd
+COPY src/mlflow_server/nginx.conf /etc/nginx/sites-enabled/default
 
 # Copy the supervisord.conf file to the expected location
-COPY /src/mlflow_server/supervisord.conf /etc/supervisor/supervisord.conf
+COPY src/mlflow_server/supervisord.conf /etc/supervisor/supervisord.conf
 
 # Expose port 80 (nginx)
 EXPOSE 80
