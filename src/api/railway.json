@@ -2,7 +2,7 @@
 	"$schema": "https://schema.up.railway.app/railway.schema.json",
 	"build": {
 		"builder": "DOCKERFILE",
-		"dockerfilePath": "./api/Dockerfile"
+		"dockerfilePath": "./Dockerfile"
 	},
 	"deploy": {
 		"startCommand": "./start_api.sh",
