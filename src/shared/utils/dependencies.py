@@ -16,10 +16,6 @@ def get_current_user(request: Request, db: Session = Depends(get_session_local))
         if not user_id:
             raise HTTPException(status_code=401, detail="Token error")
 
-        user = db.query(UserModelDb).filter(UserModelDb.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-
-        return user
+        return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Unauthorized: Invalid Token", headers={"WWW-Authenticate": "Bearer"})
