@@ -15,7 +15,7 @@ COPY /src/shared /app/shared
 COPY /src/frontend /app/frontend
 COPY /src/training /app/training
 
-RUN export PYTHONPATH=$(pwd)/src
+RUN export PYTHONPATH=$(pwd)/
 
 EXPOSE 8000
 

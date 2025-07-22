@@ -1,5 +1,8 @@
 # training/pipeline/feature_engineering.py
 from datetime import datetime
+
+import numpy as np
+import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 from shared.utils.preprocessing import preprocess_text
 
@@ -54,7 +57,7 @@ def score_of_the_match_between_two_texts(fist_text: str, second_text: str):
     second_tokens = set(preprocess_text(str(second_text or '')))
 
     if len(first_tokens) == 0 or len(second_tokens) == 0:
-        return 0.0
+        return 0
     
     common_tokens = first_tokens.intersection(second_tokens)
 
