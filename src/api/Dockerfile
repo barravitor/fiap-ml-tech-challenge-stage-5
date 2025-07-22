@@ -9,12 +9,14 @@ COPY /requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY /src/api /app/src/api
-COPY /src/api/start_api.sh /app/src/api/start_api.sh
-COPY /src/shared /app/src/shared
+COPY /src/api /app/api
+COPY /src/api/start_api.sh /app/api/start_api.sh
+COPY /src/shared /app/shared
+COPY /src/frontend /app/frontend
+COPY /src/training /app/training
 
 RUN export PYTHONPATH=$(pwd)/src
 
 EXPOSE 8000
 
-CMD ["./src/api/start_api.sh"]
+CMD ["./api/start_api.sh"]
