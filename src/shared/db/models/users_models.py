@@ -1,7 +1,7 @@
 # shared/db/models/users_models.py
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime, timezone
-from ..database import Base
+from shared.db.database import Base
 
 class UserModelDb(Base):
     __tablename__ = 'users'

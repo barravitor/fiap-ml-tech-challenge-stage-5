@@ -1,5 +1,5 @@
 import pandas as pd
-from .data_extractors import extract_job_candidates_info
+from training.data.data_extractors import extract_job_candidates_info
 
 def build_raw_candidate_dataset(jobs, applicants, prospects):
     extend_rows = []

@@ -1,7 +1,7 @@
 # shared/db/models/applications_models.py
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from datetime import datetime, timezone
-from ..database import Base
+from shared.db.database import Base
 
 class ApplicationModelDb(Base):
     __tablename__ = 'applications'

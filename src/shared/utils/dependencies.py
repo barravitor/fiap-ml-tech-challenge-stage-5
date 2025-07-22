@@ -1,8 +1,7 @@
 from fastapi import Request, HTTPException, status, Depends
 from jose import JWTError
-from .jwt_helper import verify_token
-from ..db.database import get_session_local
-from ..db.models.users_models import UserModelDb
+from shared.utils.jwt_helper import verify_token
+from shared.db.database import get_session_local
 from sqlalchemy.orm import Session
 
 def get_current_user(request: Request, db: Session = Depends(get_session_local)):

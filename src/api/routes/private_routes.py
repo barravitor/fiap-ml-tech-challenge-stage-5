@@ -11,7 +11,7 @@ from shared.db.models.index_models import JobModelDb
 from sqlalchemy.orm import Session
 from shared.db.database import get_session_local
 from training.pipeline.feature_engineering import process_features
-from ..schemas.index_schemas import JobSchema, BasicInformationSchema, ProfileSchema
+from api.schemas.index_schemas import JobSchema, BasicInformationSchema, ProfileSchema
 
 from training.data.build_dataset import build_raw_candidate_dataset
 from training.pipeline.train_storage import load_scaler, load_model

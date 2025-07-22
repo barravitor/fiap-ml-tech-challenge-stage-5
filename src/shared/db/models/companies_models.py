@@ -1,6 +1,6 @@
 # shared/db/models/companies_models.py
 from sqlalchemy import Column, Integer, String
-from ..database import Base
+from shared.db.database import Base
 
 class CompanyModelDb(Base):
     __tablename__ = "companies"

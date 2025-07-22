@@ -1,7 +1,7 @@
 # shared/db/models/jobs_models.py
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from datetime import datetime, timezone
-from ..database import Base
+from shared.db.database import Base
 
 class JobModelDb(Base):
     __tablename__ = 'jobs'

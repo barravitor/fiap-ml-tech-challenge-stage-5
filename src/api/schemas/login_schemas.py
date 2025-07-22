@@ -1,6 +1,6 @@
 # api/schemas/user_login_schemas.py
 from pydantic import BaseModel, EmailStr, Field
-from .role_schemas import UserRoleSchema
+from api.schemas.role_schemas import UserRoleSchema
 
 class LoginSchema(BaseModel):
     email: EmailStr = Field(..., example="youremail@example.com", description="Your valid email")

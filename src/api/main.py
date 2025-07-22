@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from .routes.app_routes import app_router
-from .routes.public_routes import public_router
-from .routes.private_routes import private_router
+from api.routes.app_routes import app_router
+from api.routes.public_routes import public_router
+from api.routes.private_routes import private_router
 from shared.db.database import create_table
 
 @asynccontextmanager

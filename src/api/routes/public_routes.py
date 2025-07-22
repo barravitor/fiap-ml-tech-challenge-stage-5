@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
-from ..schemas.index_schemas import LoginSchema, TokenSchema, UserRoleSchema, ChatMessageSchema
+from api.schemas.index_schemas import LoginSchema, TokenSchema, UserRoleSchema
 from shared.db.models.index_models import RecruiterModelDb, CompanyModelDb, UserModelDb
 from shared.db.database import get_session_local
 from datetime import datetime, timezone
