@@ -5,8 +5,8 @@ FROM python:3.10.12-slim
 WORKDIR /app
 
 COPY src ./
-COPY src/api/start_mlflow.sh ./api/start_mlflow.sh
-RUN chmod +x ./api/start_mlflow.sh
+COPY src/api/start_api.sh ./api/start_api.sh
+RUN chmod +x ./api/start_api.sh
 
 COPY requirements.txt ./requirements.txt
 
