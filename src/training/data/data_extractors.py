@@ -1,42 +1,6 @@
 from typing import List
 from shared.utils.preprocessing import normalize_text
 
-def map_candidate_status(status: str) -> int:
-    STATUS_MAP = {
-        # Negative statuses
-        'Inscrito': 0,
-        'Desistiu': 0,
-        'Desistiu da Contratação': 0,
-        'Não Aprovado pelo Cliente': 0,
-        'Não Aprovado pelo RH': 0,
-        'Não Aprovado pelo Requisitante': 0,
-        'Recusado': 0,
-        'Sem interesse nesta vaga': 0,
-        # Intermediate statuses
-        'Em avaliação pelo RH': 1,
-        'Encaminhado ao Requisitante': 1,
-        'Entrevista Técnica': 1,
-        'Entrevista com Cliente': 1,
-        'Encaminhar Proposta': 1,
-        'Documentação CLT': 1,
-        'Documentação Cooperado': 1,
-        'Documentação PJ': 1,
-        # Success status
-        'Aprovado': 1,
-        'Contratado como Hunting': 1,
-        'Contratado pela Decision': 1,
-        'Proposta Aceita': 1,
-    }
-
-    if not isinstance(status, str):
-        return 0
-
-    for key, value in STATUS_MAP.items():
-        if key.lower() in status.lower():
-            return value
-
-    return 0
-
 def extract_job_info(job_id: int, job_dict: dict):
     return {
         'job_id': job_id,
@@ -123,7 +87,7 @@ def extract_job_candidates_info(job_id: int, jobs, users, prospects: List[dict])
             'job_academic_level': extract_job['academic_level'],
 
             # Candidate informations
-            'candidate_status': map_candidate_status(prospect.get('situacao_candidado', ''))
+            'candidate_status': prospect.get('situacao_candidado')
         })
 
     return rows

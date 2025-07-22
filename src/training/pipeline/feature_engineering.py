@@ -63,7 +63,45 @@ def score_of_the_match_between_two_texts(fist_text: str, second_text: str):
 
     return len(common_tokens) / len(first_tokens)
 
+def map_candidate_status(status: str) -> int:
+    STATUS_MAP = {
+        # Negative statuses
+        'Inscrito': 0,
+        'Desistiu': 0,
+        'Desistiu da Contratação': 0,
+        'Não Aprovado pelo Cliente': 0,
+        'Não Aprovado pelo RH': 0,
+        'Não Aprovado pelo Requisitante': 0,
+        'Recusado': 0,
+        'Sem interesse nesta vaga': 0,
+        # Intermediate statuses
+        'Em avaliação pelo RH': 0,
+        'Encaminhado ao Requisitante': 0,
+        'Entrevista Técnica': 0,
+        'Entrevista com Cliente': 0,
+        'Encaminhar Proposta': 0,
+        'Documentação CLT': 1,
+        'Documentação Cooperado': 1,
+        'Documentação PJ': 1,
+        # Success status
+        'Aprovado': 1,
+        'Contratado como Hunting': 1,
+        'Contratado pela Decision': 1,
+        'Proposta Aceita': 1,
+    }
+
+    if not isinstance(status, str):
+        return 0
+
+    for key, value in STATUS_MAP.items():
+        if key.lower() in status.lower():
+            return value
+
+    return 0
+
 def process_features(document: dict):
+    target = map_candidate_status(document.get('candidate_status', ''))
+
     concat_user_fields = concat_fields(
         document.get('user_professional_title'),
         document.get('user_cv'),
@@ -72,7 +110,7 @@ def process_features(document: dict):
         document.get('user_areas_of_activity')
     )
 
-    return {
+    features = {
         "score_job_title": score_of_the_match_between_two_texts(
             document.get('job_title'),
             concat_user_fields
@@ -145,3 +183,5 @@ def process_features(document: dict):
         # "job_postgraduate_studies": int("pos" in str(document.get('job_academic_level'))),
         # "job_technical_education": int("tecnico" in str(document.get('job_academic_level'))),
     }
+
+    return features, target

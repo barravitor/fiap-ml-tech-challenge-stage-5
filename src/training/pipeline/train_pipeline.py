@@ -15,9 +15,6 @@ JOBS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/jobs.
 APPLICANTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/applicants.json")
 PROSPECTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/prospects.json")
 
-SKILLS_KEYWORDS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', 'shared', 'keywords')}/skill_keywords.json")
-PROFESSIONALS_KEYWORDS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', 'shared', 'keywords')}/professional_exp_keywords.json")
-
 FILE_PATH = f"{os.path.join(BASE_DIR, '..', 'data', 'raw')}/extract_job_candidates.csv"
 
 df: pd.DataFrame
@@ -36,9 +33,9 @@ extracted_features = []
 y = []
 for index, row in df.iterrows():
     print("index:", index)
-    features = process_features(row)
+    features, target = process_features(row)
     extracted_features.append(features)
-    y.append(row["candidate_status"])
+    y.append(target)
 
 df_features = pd.DataFrame(extracted_features)
 df_features.fillna(0, inplace=True)

@@ -300,6 +300,8 @@ async def predict(predict: dict, current_user: dict = Depends(get_current_user),
 
         prediction = model.predict(X_scaled)
 
+        print(prediction)
+
         return JSONResponse(content={
             'predict': int(prediction[0])
         })
