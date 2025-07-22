@@ -5,7 +5,6 @@
 		"dockerfilePath": "./src/api/Dockerfile"
 	},
 	"deploy": {
-		"startCommand": "./src/api/start_api.sh",
 		"numReplicas": 1,
 		"sleepApplication": true
 	}
