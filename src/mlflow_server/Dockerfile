@@ -13,6 +13,9 @@ RUN rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY src/mlflow_server ./
+COPY src/mlflow_server/start_mlflow.sh ./start_mlflow.sh
+RUN chmod +x ./start_mlflow.sh
+
 COPY requirements.txt ./requirements.txt
 
 # Install mlflow and other Python libs
