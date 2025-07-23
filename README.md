@@ -29,6 +29,15 @@ Our solution includes:
 - 📝 Automatically generated API docs at `/docs`
 - 🐍 Compatible with Python 3.10
 
+- **🧪 RESTful API with FastAPI**  
+  Interface for integration with external systems.
+
+  **Available Endpoints:**
+  - `POST /api/public/predict`: Sends input data and receives forecast output
+  - `GET /`: Checks API health status
+
+- [API Swagger](https://fiap-ml-tech-challenge-stage-5-production.up.railway.app/docs)
+
 ## Technologies Used
 
 - [Python 3.10](https://www.python.org/)
