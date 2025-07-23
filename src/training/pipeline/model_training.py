@@ -1,21 +1,28 @@
-from sklearn.ensemble import RandomForestClassifier
-import lightgbm as lgb
-
-n_estimators=200
-max_depth=8
-random_state=42
-
-# def train_model(X_train, y_train):
-#     model = lgb.LGBMClassifier(
-#         n_estimators=n_estimators,
-#         max_depth=max_depth,
-#         class_weight='balanced',
-#         random_state=random_state
-#     )
-#     model.fit(X_train, y_train)
-#     return model
+from xgboost import XGBClassifier
+from shared.config import (
+    RANDOM_STATE,
+    SCALE_POS_WEIGHT,
+    EVAL_METRIC,
+    MAX_DEPTH,
+    N_ESTIMATORS,
+    LEARNING_RATE,
+    SUBSAMPLE,
+    COLSAMPLE_BYTREE,
+    MIN_CHILD_WEIGHT,
+)
 
 def train_model(X_train, y_train):
-    model = RandomForestClassifier(class_weight='balanced', n_estimators=n_estimators, max_depth=max_depth, random_state=random_state)
+    model = XGBClassifier(
+        scale_pos_weight=SCALE_POS_WEIGHT,
+        eval_metric=EVAL_METRIC,
+        random_state=RANDOM_STATE,
+        n_estimators=N_ESTIMATORS,
+        max_depth=MAX_DEPTH,
+        learning_rate=LEARNING_RATE,
+        subsample=SUBSAMPLE,
+        colsample_bytree=COLSAMPLE_BYTREE,
+        min_child_weight=MIN_CHILD_WEIGHT
+    )
+
     model.fit(X_train, y_train)
     return model

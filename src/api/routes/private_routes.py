@@ -1,6 +1,6 @@
 # api/routes/private_routes.py
 import os
-import pandas as pd
+import numpy as np
 import httpx
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
@@ -12,9 +12,9 @@ from sqlalchemy.orm import Session
 from shared.db.database import get_session_local
 from training.pipeline.feature_engineering import process_features
 from api.schemas.index_schemas import JobSchema, BasicInformationSchema, ProfileSchema
-
 from training.data.build_dataset import build_raw_candidate_dataset
-from training.pipeline.train_storage import load_scaler, load_model
+from training.pipeline.train_storage import load_model
+from shared.config import THRESHOLD
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -273,7 +273,7 @@ async def post_jobs(job: JobSchema, current_user: dict = Depends(get_current_use
 )
 async def predict(predict: dict, current_user: dict = Depends(get_current_user), db: Session = Depends(get_session_local)):
     try:
-        print(list(predict['user'].keys())[0])
+        model = load_model(f"{os.path.join(BASE_DIR, '..', '..', 'training', 'data', 'processed')}/model.pkl")
 
         data = build_raw_candidate_dataset(predict['job'], predict['user'], {
             list(predict['job'].keys())[0]: {
@@ -286,24 +286,16 @@ async def predict(predict: dict, current_user: dict = Depends(get_current_user),
 
         extracted_features = []
         for index, row in data.iterrows():
-            features = process_features(row)
+            features, target = process_features(row)
             extracted_features.append(features)
 
-        df_features = pd.DataFrame(extracted_features)
-        print(df_features.values)
-        df_features.fillna(0, inplace=True)
-
-        scaler = load_scaler(f"{os.path.join(BASE_DIR, '..', '..', 'training', 'data', 'processed')}/scaler.pkl")
-        model = load_model(f"{os.path.join(BASE_DIR, '..', '..', 'training', 'data', 'processed')}/model.pkl")
-
-        X_scaled = scaler.transform(df_features.values)
-
-        prediction = model.predict(X_scaled)
-
-        print(prediction)
+        X = np.array(extracted_features)
+        probas = model.predict_proba(X)[:, 1]
+        prediction = (probas >= THRESHOLD).astype(int)
 
         return JSONResponse(content={
-            'predict': int(prediction[0])
+            'predict': int(prediction[0]),
+            'proba': float(probas)
         })
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
