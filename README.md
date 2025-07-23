@@ -37,6 +37,11 @@ export PYTHONPATH=$(pwd)/src
 pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt # Run to install the necessary packages
 ```
 
+Run the mlflow
+```bash
+./start_mlflow.sh # Run to execute ML Flow on browser on url: http://localhost:5000
+```
+
 Run the API
 ```bash
 ./start_api.sh # Run to execute API REST on url: http://localhost:8000

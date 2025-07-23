@@ -12,9 +12,9 @@ from shared.db.models.index_models import RecruiterModelDb, CompanyModelDb, User
 from shared.db.database import get_session_local
 from datetime import datetime, timezone
 from shared.utils.jwt_helper import create_jwt_token
-from src.training.data.build_dataset import build_raw_candidate_dataset
-from src.training.pipeline.feature_engineering import process_features
-from src.training.pipeline.train_storage import load_model
+from training.data.build_dataset import build_raw_candidate_dataset
+from training.pipeline.feature_engineering import process_features
+from training.pipeline.train_storage import load_model
 from shared.config import THRESHOLD
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
