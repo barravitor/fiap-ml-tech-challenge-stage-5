@@ -1,6 +1,4 @@
 # api/routes/private_routes.py
-import os
-import numpy as np
 import httpx
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
@@ -10,13 +8,7 @@ from shared.utils.dependencies import get_current_user
 from shared.db.models.index_models import JobModelDb
 from sqlalchemy.orm import Session
 from shared.db.database import get_session_local
-from training.pipeline.feature_engineering import process_features
 from api.schemas.index_schemas import JobSchema, BasicInformationSchema, ProfileSchema
-from training.data.build_dataset import build_raw_candidate_dataset
-from training.pipeline.train_storage import load_model
-from shared.config import THRESHOLD
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 private_router = APIRouter()
 
@@ -226,76 +218,6 @@ async def post_jobs(job: JobSchema, current_user: dict = Depends(get_current_use
         return JSONResponse(content={
             "job_id": new_job.id,
             "applied_url": "http://localhost:8000/public/jobs/{new_job.id}"
-        })
-    except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error to find data: {str(e)}")
-    
-@private_router.post("/predict", response_class=JSONResponse,
-    responses={
-        200: {
-            "description": "CSV file with exportation data.",
-            "content": {
-                "text/csv": {
-                    "example": "category,date\nVinhos de mesa,1970-12-21\nVinhos de mesa,1971-12-21\n"
-                }
-            }
-        },
-        401: {
-            "description": "Unauthorized",
-            "content": {
-                "application/json": {
-                    "examples": {
-                        "invalid_token": {
-                            "summary": "Unauthorized",
-                            "value": {
-                                "detail": "Unauthorized: Invalid Token"
-                            }
-                        },
-                        "not_authenticated": {
-                            "summary": "Unauthorized",
-                            "value": {
-                                "detail": "Not authenticated"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        404: {
-            "description": "Data not found."
-        },
-        422: {
-            "description": "Unprocessable Entity. Validation error in provided filters."
-        },
-    }
-)
-async def predict(predict: dict, current_user: dict = Depends(get_current_user), db: Session = Depends(get_session_local)):
-    try:
-        model = load_model(f"{os.path.join(BASE_DIR, '..', '..', 'training', 'data', 'processed')}/model.pkl")
-
-        data = build_raw_candidate_dataset(predict['job'], predict['user'], {
-            list(predict['job'].keys())[0]: {
-                'prospects': [{
-                    'codigo': list(predict['user'].keys())[0],
-                    'situacao_candidado': None
-                }]
-            }
-        })
-
-        extracted_features = []
-        for index, row in data.iterrows():
-            features, target = process_features(row)
-            extracted_features.append(features)
-
-        X = np.array(extracted_features)
-        probas = model.predict_proba(X)[:, 1]
-        prediction = (probas >= THRESHOLD).astype(int)
-
-        return JSONResponse(content={
-            'predict': int(prediction[0]),
-            'proba': float(probas)
         })
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=str(exc))

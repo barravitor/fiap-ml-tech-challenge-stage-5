@@ -1,6 +1,9 @@
 # api/routes/public_routes.py
+import os
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
+import httpx
+import numpy as np
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
@@ -9,6 +12,12 @@ from shared.db.models.index_models import RecruiterModelDb, CompanyModelDb, User
 from shared.db.database import get_session_local
 from datetime import datetime, timezone
 from shared.utils.jwt_helper import create_jwt_token
+from src.training.data.build_dataset import build_raw_candidate_dataset
+from src.training.pipeline.feature_engineering import process_features
+from src.training.pipeline.train_storage import load_model
+from shared.config import THRESHOLD
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 public_router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -95,8 +104,72 @@ def login(login: LoginSchema, db: Session = Depends(get_session_local)):
     response.set_cookie(key="access_token", value=access_token, httponly=True)
     return response
 
-    # return {
-    #     "access_token": access_token,
-    #     "role": login.role,
-    #     "token_type": "bearer"
-    # }
+@public_router.post("/predict", response_class=JSONResponse,
+    responses={
+        200: {
+            "description": "CSV file with exportation data.",
+            "content": {
+                "text/csv": {
+                    "example": "category,date\nVinhos de mesa,1970-12-21\nVinhos de mesa,1971-12-21\n"
+                }
+            }
+        },
+        401: {
+            "description": "Unauthorized",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "invalid_token": {
+                            "summary": "Unauthorized",
+                            "value": {
+                                "detail": "Unauthorized: Invalid Token"
+                            }
+                        },
+                        "not_authenticated": {
+                            "summary": "Unauthorized",
+                            "value": {
+                                "detail": "Not authenticated"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        404: {
+            "description": "Data not found."
+        },
+        422: {
+            "description": "Unprocessable Entity. Validation error in provided filters."
+        },
+    }
+)
+async def predict(predict: dict, db: Session = Depends(get_session_local)):
+    try:
+        model = load_model(f"{os.path.join(BASE_DIR, '..', '..', 'training', 'data', 'processed')}/model.pkl")
+
+        data = build_raw_candidate_dataset(predict['job'], predict['user'], {
+            list(predict['job'].keys())[0]: {
+                'prospects': [{
+                    'codigo': list(predict['user'].keys())[0],
+                    'situacao_candidado': None
+                }]
+            }
+        })
+
+        extracted_features = []
+        for index, row in data.iterrows():
+            features, target = process_features(row)
+            extracted_features.append(features)
+
+        X = np.array(extracted_features)
+        probas = model.predict_proba(X)[:, 1]
+        prediction = (probas >= THRESHOLD).astype(int)
+
+        return JSONResponse(content={
+            'predict': int(prediction[0]),
+            'proba': float(probas)
+        })
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error to find data: {str(e)}")

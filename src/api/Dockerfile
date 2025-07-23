@@ -17,4 +17,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD ["./api/start_api.sh"]
+CMD ["api/start_api.sh"]
