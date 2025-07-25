@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from shared.utils.jwt_helper import create_jwt_token
 from training.data.build_dataset import build_raw_candidate_dataset
 from training.pipeline.feature_engineering import process_features
-from training.pipeline.train_storage import load_mlflow_model
+from training.pipeline.train_storage import get_or_load_model
 from shared.config import THRESHOLD, SCALE_POS_WEIGHT
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -156,7 +156,7 @@ async def predict(predict: dict, db: Session = Depends(get_session_local)):
         model_name = f"XGBoost_SMOTE_SPW{SCALE_POS_WEIGHT}"
 
         prod_version = client.get_model_version_by_alias(model_name, 'Production')
-        model = load_mlflow_model(model_name, prod_version.version)
+        model = get_or_load_model(model_name, prod_version.version)
 
         prospects = build_raw_candidate_dataset(predict['job'], predict['user'], {
             list(predict['job'].keys())[0]: {

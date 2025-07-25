@@ -7,9 +7,10 @@ from training.data.data_loader import load_json_file
 from training.data.build_dataset import build_raw_candidate_dataset
 from training.pipeline.feature_engineering import process_features
 from training.pipeline.train_storage import load_features, load_model, save_features, save_model
-from sklearn.model_selection import train_test_split
 from training.pipeline.model_training import train_model
 from training.pipeline.model_evaluation import evaluate_model
+from training.pipeline.model_register import register_model
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, precision_recall_curve
 from imblearn.over_sampling import SMOTE
@@ -125,6 +126,8 @@ if __name__ == "__main__":
             end_time = time.time()
             training_duration = end_time - start_time
             mlflow.log_metric("training_time_in_seconds", training_duration)
+
+            register_model(run_id)
 
 
 

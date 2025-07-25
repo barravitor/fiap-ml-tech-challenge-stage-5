@@ -76,7 +76,6 @@ $env:PYTHONPATH="$PWD/src"    # On Windows (PowerShell)
 
 # Install dependencies:
 pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt # Run to install the necessary packages
-python -m nltk.downloader all
 ```
 
 ---
@@ -118,7 +117,7 @@ This will execute the full training pipeline using the provided data.
 
 ---
 
-## 🌐 4. API
+### 🌐 4. API
 
 Start the REST API with the following command:
 
