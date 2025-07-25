@@ -6,6 +6,7 @@ load_dotenv(override=True)
 
 PRODUCTION = os.getenv('PRODUCTION', 'false').lower() == 'true'
 DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'
+TRAINED_MODEL_FOLDER=os.getenv('TRAINED_MODEL_FOLDER')
 
 if PRODUCTION:
     DEBUG = False

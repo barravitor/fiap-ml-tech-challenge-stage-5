@@ -3,6 +3,7 @@ import joblib
 import mlflow
 import numpy as np
 from xgboost import XGBClassifier
+from shared.config import TRAINED_MODEL_FOLDER
 
 def save_features(X, y, path='data/processed/features_dataset.npz'):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -32,8 +33,7 @@ def load_mlflow_model(model_name: str, version: int = None) -> XGBClassifier:
     return mlflow_model
 
 def get_or_load_model(model_name: str, version: int = None) -> XGBClassifier:
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    cache_path = f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/{model_name}_version_{version}_cached.pkl"
+    cache_path = f"{TRAINED_MODEL_FOLDER}/{model_name}_version_{version}_cached.pkl"
 
     if os.path.exists(cache_path):
         return load_model(cache_path)
