@@ -55,28 +55,76 @@ Our solution includes:
 
 Instructions on how to install and run the project locally.
 
-### 1. Environment Setup
+---
+
+### ✅ 1. Environment Setup
 Create a .env file in the project root following the example in the .env-example file
 
 Required python version: 3.10.12
 
 ```bash
-python3.10 -m venv .venv # Run to create the environment
-source .venv/bin/activate # Run to start the environment
+python3.10 -m venv .venv   # Run to create the environment
+source venv/bin/activate   # On Linux/macOS
+venv\Scripts\activate.bat  # On Windows
 export PYTHONPATH=$(pwd)/src
 pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt # Run to install the necessary packages
 python -m nltk.downloader all
 ```
 
+---
+
+### 📊 2. MLflow
 Run the mlflow
 ```bash
-./start_mlflow.sh # Run to execute ML Flow on browser on url: http://localhost:5000
+./start_mlflow.sh
 ```
 
-Run the API
-```bash
-./start_api.sh # Run to execute API REST on url: http://localhost:8000
+Once executed, open your browser and access:
+
+👉 http://localhost:5000
+
+This will open the MLflow dashboard, where you can track experiments, models, and metrics.
+
+---
+
+### 🧠 3. Model Training
+
+Before running the training pipeline, make sure to create a folder named `data` in the root of the project and place inside it the 3 JSON files provided by **Decision**.
+
+**Expected folder structure:**
+
 ```
+/data
+ ├─ applicants.json
+ ├─ prospects.json
+ └─ vagas.json
+```
+
+To start the training process, run:
+
+```bash
+python ./src/training/pipeline/train_pipeline.py
+```
+
+This will execute the full training pipeline using the provided data.
+
+---
+
+## 🌐 4. API
+
+Start the REST API with the following command:
+
+```bash
+./start_api.sh
+```
+
+Once running, the API will be available at:
+
+👉 http://localhost:8000
+
+You can now send requests to the API to interact with the trained model.
+
+---
 
 ## Contribution
 

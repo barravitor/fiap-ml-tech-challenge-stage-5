@@ -30,7 +30,7 @@ from shared.config import (
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JOBS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/jobs.json")
+JOBS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/vagas.json")
 APPLICANTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/applicants.json")
 PROSPECTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/prospects.json")
 FILE_PATH = f"{os.path.join(BASE_DIR, '..', 'data', 'raw')}/extract_job_candidates.csv"
@@ -40,6 +40,7 @@ df: pd.DataFrame
 if not os.path.isfile(FILE_PATH):
     print("Arquivo não encontrado, executando o bloco if")
     df = build_raw_candidate_dataset(JOBS, APPLICANTS, PROSPECTS)
+    os.makedirs(os.path.dirname(FILE_PATH), exist_ok=True)
     df.to_csv(FILE_PATH, index=False, encoding="utf-8")
 else:
     print("Arquivo encontrado, executando o load do arquivo")
