@@ -63,10 +63,18 @@ Create a .env file in the project root following the example in the .env-example
 Required python version: 3.10.12
 
 ```bash
-python3.10 -m venv .venv   # Run to create the environment
-source venv/bin/activate   # On Linux/macOS
-venv\Scripts\activate.bat  # On Windows
-export PYTHONPATH=$(pwd)/src
+python3.10 -m venv .venv      # Run to create the environment
+
+# Activate the environment:
+source .venv/bin/activate     # On Linux/macOS
+venv\Scripts\activate.bat     # On Windows
+
+# Set the PYTHONPATH:
+export PYTHONPATH=$(pwd)/src  # On Linux/macOS
+set PYTHONPATH=%cd%\\src      # On Windows (Command Prompt)
+$env:PYTHONPATH="$PWD/src"    # On Windows (PowerShell)
+
+# Install dependencies:
 pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt # Run to install the necessary packages
 python -m nltk.downloader all
 ```
@@ -123,6 +131,27 @@ Once running, the API will be available at:
 👉 http://localhost:8000
 
 You can now send requests to the API to interact with the trained model.
+
+---
+
+### 📁 5. Project Structure
+
+```
+root/
+├── data/
+│   ├── applicants.json
+│   ├── prospects.json
+│   └── vagas.json
+├── src/*
+├── .env
+├── .env-exemple
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── start_api.sh
+├── start_mlflow.sh
+└── tech_challenge.pdf
+```
 
 ---
 

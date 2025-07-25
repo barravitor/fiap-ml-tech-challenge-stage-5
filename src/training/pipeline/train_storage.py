@@ -1,6 +1,8 @@
 import os
 import joblib
+import mlflow
 import numpy as np
+from xgboost import XGBClassifier
 
 def save_features(X, y, path='data/processed/features_dataset.npz'):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -23,3 +25,8 @@ def save_model(model, path='data/processed/model.pkl'):
 
 def load_model(path='data/processed/model.pkl'):
     return joblib.load(path)
+
+def load_mlflow_model(model_name: str, version: int = None) -> XGBClassifier:
+    mlflow_model_uri = f"models:/{model_name}/{version}"
+    mlflow_model: XGBClassifier = mlflow.xgboost.load_model(mlflow_model_uri)
+    return mlflow_model
