@@ -6,17 +6,6 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-# Garante que os recursos do NLTK estão disponíveis
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords')
-
 # Define stopwords em português
 STOP_WORDS = set(stopwords.words('portuguese'))
 
