@@ -13,6 +13,8 @@ COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('punkt_tab')"
+
 ENV PYTHONPATH=/app
 
 EXPOSE 8000

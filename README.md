@@ -76,6 +76,8 @@ $env:PYTHONPATH="$PWD/src"    # On Windows (PowerShell)
 
 # Install dependencies:
 pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt # Run to install the necessary packages
+
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('punkt_tab')"
 ```
 
 ---

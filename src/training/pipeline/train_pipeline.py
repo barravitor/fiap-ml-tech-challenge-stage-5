@@ -1,3 +1,4 @@
+import json
 import os
 import time
 import mlflow
@@ -6,12 +7,11 @@ import pandas as pd
 from training.data.data_loader import load_json_file
 from training.data.build_dataset import build_raw_candidate_dataset
 from training.pipeline.feature_engineering import process_features
-from training.pipeline.train_storage import load_features, load_model, save_features, save_model
+from training.pipeline.train_storage import load_features, save_features, save_model
 from training.pipeline.model_training import train_model
 from training.pipeline.model_evaluation import evaluate_model
 from training.pipeline.model_register import register_model
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, precision_recall_curve
 from imblearn.over_sampling import SMOTE
 from sklearn.metrics import f1_score, recall_score
@@ -28,6 +28,7 @@ from shared.config import (
     SUBSAMPLE,
     COLSAMPLE_BYTREE,
     MIN_CHILD_WEIGHT,
+    STATUS_MAP,
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -47,6 +48,7 @@ else:
     print("Arquivo encontrado, executando o load do arquivo")
     df = pd.read_csv(FILE_PATH)
 
+df = df.fillna("")
 print(df.head())
 
 if __name__ == "__main__":
@@ -64,6 +66,7 @@ if __name__ == "__main__":
             mlflow.set_tag("threshold_strategy", f"Custom threshold {THRESHOLD}")
             mlflow.set_tag("run_description", "XGBoost model to predict the fit between candidates and vacancies, focusing on class 1 recall (candidates with a good profile)")
             mlflow.set_tag("target_metric", "recall_class_1")
+            mlflow.set_tag("STATUS_MAP", json.dumps(STATUS_MAP, ensure_ascii=False))
 
             mlflow.log_param("scale_pos_weight", SCALE_POS_WEIGHT)
             mlflow.log_param("threshold", THRESHOLD)
@@ -94,8 +97,8 @@ if __name__ == "__main__":
             mlflow.log_param("total_samples", len(X))
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE_SPLIT, random_state=RANDOM_STATE, stratify=y)
 
-            print("Treino:", np.bincount(y_train))
-            print("Teste :", np.bincount(y_test))
+            mlflow.log_param("train_class_total", str(np.bincount(y_train).tolist()))
+            mlflow.log_param("test_class_total", str(np.bincount(y_test).tolist()))
 
             smote = SMOTE(random_state=RANDOM_STATE)
             X_train_res, y_train_res = smote.fit_resample(X_train, y_train)

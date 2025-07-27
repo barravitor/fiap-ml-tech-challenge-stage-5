@@ -25,7 +25,7 @@ def normalize_text(text: str) -> str:
 
     # Normalização inicial
     text = unidecode(text.lower())
-    text = re.sub(r"[^\w\s]", "", text)  # Remove pontuações
+    text = re.sub(r"[^\w\s]", " ", text)  # Remove pontuações
     text = re.sub(r"\s+", " ", text).strip()
 
     # Tokenização e remoção de stopwords

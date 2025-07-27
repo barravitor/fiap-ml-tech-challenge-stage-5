@@ -9,6 +9,7 @@ from shared.config import (
     SUBSAMPLE,
     COLSAMPLE_BYTREE,
     MIN_CHILD_WEIGHT,
+    N_THREAD,
 )
 
 def train_model(X_train, y_train):
@@ -21,7 +22,8 @@ def train_model(X_train, y_train):
         learning_rate=LEARNING_RATE,
         subsample=SUBSAMPLE,
         colsample_bytree=COLSAMPLE_BYTREE,
-        min_child_weight=MIN_CHILD_WEIGHT
+        min_child_weight=MIN_CHILD_WEIGHT,
+        nthread=N_THREAD,
     )
 
     model.fit(X_train, y_train)

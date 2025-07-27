@@ -5,10 +5,11 @@ from data_loader import load_json_file
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-JOBS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/jobs.json")
+JOBS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/vagas.json")
 APPLICANTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/applicants.json")
 PROSPECTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/prospects.json")
 
+# Analisar os status dos candidatos
 status_set = set()
 
 for job_id, document in PROSPECTS.items():
