@@ -17,13 +17,14 @@ __pycache__
 
 # Ignore folders
 mlruns/
-/data
-processed/
-raw/
 mlartifacts/
 tmp/
 gcp-storage-service-account.json
 src/mlflow_server/data
+/outputs
+data/raw/**
+data/interim/**
+data/processed/**
 
 curriculo1.pdf
 curriculo2.pdf

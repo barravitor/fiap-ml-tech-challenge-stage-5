@@ -3,6 +3,7 @@ import joblib
 import mlflow
 import numpy as np
 from xgboost import XGBClassifier
+from mlflow.tracking import MlflowClient
 from shared.config import TRAINED_MODEL_FOLDER
 
 def save_features(X, y, path='data/processed/features_dataset.npz'):
@@ -32,8 +33,12 @@ def load_mlflow_model(model_name: str, version: int = None) -> XGBClassifier:
     mlflow_model: XGBClassifier = mlflow.xgboost.load_model(mlflow_model_uri)
     return mlflow_model
 
-def get_or_load_model(model_name: str, version: int = None) -> XGBClassifier:
-    cache_path = f"{TRAINED_MODEL_FOLDER}/{model_name}_version_{version}_cached.pkl"
+def get_or_load_model(model_name: str) -> XGBClassifier:
+    client = MlflowClient()
+    prod_version = client.get_model_version_by_alias(model_name, 'Production')
+    version = prod_version.version or 1
+
+    cache_path = f"{TRAINED_MODEL_FOLDER}/processed/models/{model_name}_version_{version}_cached.pkl"
 
     if os.path.exists(cache_path):
         return load_model(cache_path)

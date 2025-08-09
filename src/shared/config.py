@@ -1,4 +1,3 @@
-# shared/config.py
 from dotenv import load_dotenv
 import os
 
@@ -46,8 +45,8 @@ STATUS_MAP = {
 # 
 RANDOM_STATE=42
 TEST_SIZE_SPLIT=0.2
-THRESHOLD=0.42
-SCALE_POS_WEIGHT=2
+THRESHOLD=0.6
+SCALE_POS_WEIGHT=2.5
 N_ESTIMATORS=100
 MAX_DEPTH=8
 LEARNING_RATE=0.1

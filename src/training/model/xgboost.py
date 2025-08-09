@@ -12,7 +12,7 @@ from shared.config import (
     N_THREAD,
 )
 
-def train_model(X_train, y_train):
+def train(X_train, y_train, X_test, y_test):
     model = XGBClassifier(
         scale_pos_weight=SCALE_POS_WEIGHT,
         eval_metric=EVAL_METRIC,
@@ -20,11 +20,18 @@ def train_model(X_train, y_train):
         n_estimators=N_ESTIMATORS,
         max_depth=MAX_DEPTH,
         learning_rate=LEARNING_RATE,
+        early_stopping_rounds=10,
         subsample=SUBSAMPLE,
         colsample_bytree=COLSAMPLE_BYTREE,
         min_child_weight=MIN_CHILD_WEIGHT,
         nthread=N_THREAD,
     )
 
-    model.fit(X_train, y_train)
+    model.fit(
+        X_train,
+        y_train,
+        eval_set=[(X_train, y_train), (X_test, y_test)],
+        verbose=False
+    )
+
     return model

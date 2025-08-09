@@ -1,17 +1,10 @@
-# api/main.py
 from contextlib import asynccontextmanager
-import os
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from api.routes.app_routes import app_router
 from api.routes.public_routes import public_router
-from api.routes.private_routes import private_router
-from shared.db.database import create_table
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting the application...")
-    create_table()
     yield
     print("Closing the application...")
 
@@ -31,25 +24,10 @@ app = FastAPI(
     openapi_tags=[{
         "name": "API Public Routes",
         "description": "Public API routes available without authentication."
-    }
-    # , {
-    #     "name": "API Private Routes",
-    #     "description": "Secure endpoints accessible only to authenticated users for managing jobs and profiles."
-    # }
-    # , {
-    #     "name": "App Routes",
-    #     "description": "Routes related to frontend behavior (HTML pages, static assets, and routing)."
-    # }
-    ]
+    }]
 )
 
-# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
-# app.mount("/static", StaticFiles(directory=os.path.join(FRONTEND_DIR, 'static')), name="static")
-
 app.include_router(public_router, prefix="/api/public", tags=["API Public Routes"])
-# app.include_router(private_router, prefix="/api/private", tags=["API Private Routes"])
-# app.include_router(app_router, prefix="/app", tags=["App Routes"])
 
 @app.get("/")
 def read_root():

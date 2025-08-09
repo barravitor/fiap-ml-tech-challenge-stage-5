@@ -1,20 +1,23 @@
 import json
 import os
-import time
+from matplotlib import pyplot as plt
 import mlflow
 import numpy as np
 import pandas as pd
-from training.data.data_loader import load_json_file
-from training.data.build_dataset import build_raw_candidate_dataset
-from training.pipeline.feature_engineering import process_features
-from training.pipeline.train_storage import load_features, save_features, save_model
-from training.pipeline.model_training import train_model
-from training.pipeline.model_evaluation import evaluate_model
-from training.pipeline.model_register import register_model
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, precision_recall_curve
+import xgboost as xgb
 from imblearn.over_sampling import SMOTE
-from sklearn.metrics import f1_score, recall_score
+from sklearn.metrics import (
+    f1_score, recall_score, roc_curve, auc, precision_recall_curve,
+    average_precision_score, classification_report, ConfusionMatrixDisplay,
+    accuracy_score
+)
+from sklearn.model_selection import train_test_split
+from training.pipeline.model_register import register_model
+from training.preprocessing.geocode import generate_geocodes
+from training.preprocessing.data_loader import load_json_file
+from training.pipeline.build import candidate_dataset, candidate_geo_dataset, embed_dataset, feature_matrix
+from training.pipeline.train_storage import save_features, save_model
+from training.model.xgboost import train
 from shared.config import (
     MLFLOW_TRACKING_URI,
     RANDOM_STATE,
@@ -31,28 +34,17 @@ from shared.config import (
     STATUS_MAP,
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JOBS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/vagas.json")
-APPLICANTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/applicants.json")
-PROSPECTS = load_json_file(f"{os.path.join(BASE_DIR, '..', '..', '..', 'data')}/prospects.json")
-FILE_PATH = f"{os.path.join(BASE_DIR, '..', 'data', 'raw')}/extract_job_candidates.csv"
+VERSION=1
 
-df: pd.DataFrame
+DATA_INTERIM_CAND = f"data/interim/candidates_{VERSION}.csv"
+DATA_INTERIM_GEO = f"data/interim/geocodes_{VERSION}.csv"
+DATA_INTERIM_CAND_PLUS_GEO = f"data/interim/candidates_geo_{VERSION}.csv"
+DATA_INTERIM_EMBED = f"data/interim/embeddings_{VERSION}.parquet"
+MODEL_OUTPUT = f"outputs/models/model_{VERSION}.pkl"
+FEATURES_OUTPUT = f"outputs/features/features_dataset_{VERSION}.npz"
+PREDICTIONS_OUTPUT = f"outputs/predictions/preds_{VERSION}.csv"
 
-if not os.path.isfile(FILE_PATH):
-    print("Arquivo não encontrado, executando o bloco if")
-    df = build_raw_candidate_dataset(JOBS, APPLICANTS, PROSPECTS)
-    os.makedirs(os.path.dirname(FILE_PATH), exist_ok=True)
-    df.to_csv(FILE_PATH, index=False, encoding="utf-8")
-else:
-    print("Arquivo encontrado, executando o load do arquivo")
-    df = pd.read_csv(FILE_PATH)
-
-df = df.fillna("")
-print(df.head())
-
-if __name__ == "__main__":
-    start_time = time.time()
+def main():
     mlflow.set_experiment("FIAP ML STAGE 5 | DATATHON")
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
@@ -81,32 +73,86 @@ if __name__ == "__main__":
             mlflow.log_param("learning_rate", LEARNING_RATE)
             mlflow.log_param("n_estimators", N_ESTIMATORS)
 
-            extracted_features = []
-            y = []
-            for index, row in df.iterrows():
-                print("index:", index)
-                features, target = process_features(row)
-                extracted_features.append(features)
-                y.append(target)
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 1: Lendo dados brutos...")
+            JOBS = load_json_file("./data/raw/vagas.json")
+            APPLICANTS = load_json_file("./data/raw/applicants.json")
+            PROSPECTS = load_json_file("./data/raw/prospects.json")
 
-            X = np.array(extracted_features)
-            y = np.array(y)
+            df_raw: pd.DataFrame
+            if not os.path.isfile(DATA_INTERIM_CAND):
+                print("Arquivo não encontrado, executando o bloco if")
+                df_raw = candidate_dataset(JOBS, APPLICANTS, PROSPECTS)
+                os.makedirs(os.path.dirname(DATA_INTERIM_CAND), exist_ok=True)
+                df_raw.to_csv(DATA_INTERIM_CAND, index=False, encoding="utf-8")
+            else:
+                print("Arquivo encontrado, executando o load do arquivo")
+                df_raw = pd.read_csv(DATA_INTERIM_CAND)
 
-            save_features(X, y, f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/features_dataset.npz")
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 2: Gerando geocodificação...")
+            df_geo: pd.DataFrame
+            if not os.path.isfile(DATA_INTERIM_GEO):
+                print("Arquivo não encontrado, executando o bloco if")
+                df_geo = generate_geocodes(df_raw)
+                os.makedirs(os.path.dirname(DATA_INTERIM_GEO), exist_ok=True)
+                df_geo.to_csv(DATA_INTERIM_GEO, index=False, encoding="utf-8")
+            else:
+                print("Arquivo encontrado, executando o load do arquivo")
+                df_geo = pd.read_csv(DATA_INTERIM_GEO)
+
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 3: Adicionando location...")
+            df_cand_geo: pd.DataFrame
+            if not os.path.isfile(DATA_INTERIM_CAND_PLUS_GEO):
+                print("Arquivo não encontrado, executando o bloco if")
+                df_cand_geo = candidate_geo_dataset(df_raw, df_geo)
+                os.makedirs(os.path.dirname(DATA_INTERIM_CAND_PLUS_GEO), exist_ok=True)
+                df_cand_geo.to_csv(DATA_INTERIM_CAND_PLUS_GEO, index=False, encoding="utf-8")
+            else:
+                print("Arquivo encontrado, executando o load do arquivo")
+                df_cand_geo = pd.read_csv(DATA_INTERIM_CAND_PLUS_GEO)
+
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 4: Gerando embeddings...")
+            df_embed: pd.DataFrame
+            if not os.path.isfile(DATA_INTERIM_EMBED):
+                print("Arquivo não encontrado, executando o bloco if")
+                df_embed = embed_dataset(df_cand_geo)
+                os.makedirs(os.path.dirname(DATA_INTERIM_EMBED), exist_ok=True)
+                df_embed.to_parquet(DATA_INTERIM_EMBED, index=False)
+            else:
+                print("Arquivo encontrado, executando o load do arquivo")
+                df_embed = pd.read_parquet(DATA_INTERIM_EMBED)
+
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 5: Construindo matriz de features...")
+            extracted_features = feature_matrix(df_embed)
+
+            features = [{k: v for k, v in feature.items() if k != 'target'} for feature in extracted_features]
+            targets = [{k: v for k, v in feature.items() if k == 'target'} for feature in extracted_features]
+            features_name = list(features[0].keys())
+
+            X = np.array([np.concatenate(list(feature.values())) for feature in features], dtype=np.float32)
+            y = np.array([target['target'] for target in targets], dtype=np.float32)
+
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 6: Treinando modelo...")
+            print(X.shape)
+            save_features(X, y, FEATURES_OUTPUT)
 
             mlflow.log_param("total_samples", len(X))
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE_SPLIT, random_state=RANDOM_STATE, stratify=y)
 
-            mlflow.log_param("train_class_total", str(np.bincount(y_train).tolist()))
-            mlflow.log_param("test_class_total", str(np.bincount(y_test).tolist()))
+            mlflow.log_param("train_class_total", str(np.bincount(y_train.astype(int)).tolist()))
+            mlflow.log_param("test_class_total", str(np.bincount(y_test.astype(int)).tolist()))
 
             smote = SMOTE(random_state=RANDOM_STATE)
             X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
 
-            model = train_model(X_train_res, y_train_res)
-            evaluate_model(model, X_test, y_test)
+            model = train(X_train_res, y_train_res, X_test, y_test)
 
-            save_model(model, path=f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/model.pkl")
+            save_model(model, MODEL_OUTPUT)
 
             mlflow.xgboost.log_model(
                 xgb_model=model,
@@ -117,175 +163,119 @@ if __name__ == "__main__":
                 signature=None,
             )
 
-            probas = model.predict_proba(X_test)[:, 1]
-            y_pred = (probas >= THRESHOLD).astype(int)
+            print("-------------------------------------------------------------------------------------------------------------------------------")
+            print("Etapa 7: Rodando predições...")
 
-            f1_class1 = f1_score(y_test, y_pred, pos_label=1)
-            recall_class1 = recall_score(y_test, y_pred, pos_label=1)
+            results = model.evals_result()
 
+            # === 1. Gerar previsões ===
+            y_true = y_test
+            y_pred_proba = model.predict_proba(X_test)[:, 1]
+            y_pred_threshold = (y_pred_proba >= THRESHOLD).astype(int)
+
+            # === 2. Métricas baseadas em probabilidade ===
+            precision, recall, thresholds = precision_recall_curve(y_true, y_pred_proba)
+            average_precision = average_precision_score(y_true, y_pred_proba)
+            fpr, tpr, _ = roc_curve(y_true, y_pred_proba)
+            roc_auc = auc(fpr, tpr)
+
+            # === 3. Métricas baseadas em classe (threshold aplicado) ===
+            accuracy = accuracy_score(y_true, y_pred_threshold)
+            f1_class1 = f1_score(y_true, y_pred_threshold, pos_label=1)
+            recall_class1 = recall_score(y_true, y_pred_threshold, pos_label=1)
+
+            # Logar no MLflow
+            mlflow.log_metric("average_precision", average_precision)
+            mlflow.log_metric("roc_auc", roc_auc)
             mlflow.log_metric("f1_class1", f1_class1)
             mlflow.log_metric("recall_class1", recall_class1)
+            mlflow.log_metric("accuracy", accuracy)
 
-            end_time = time.time()
-            training_duration = end_time - start_time
-            mlflow.log_metric("training_time_in_seconds", training_duration)
+            # === 5. Prints no console ===
+            print("Acurácia:", accuracy)
+            print("F1 Score (classe 1):", f1_class1)
+            print("Recall (classe 1):", recall_class1)
+            print("Average Precision (PR AUC):", average_precision)
+            print("AUC ROC:", roc_auc)
+            print("Relatório de Classificação:\n", classification_report(y_true, y_pred_threshold))
+
+            # -------------------------------------------------------------------------------------------------- #
+            # IMAGE GRAFIC: ROC Curve
+            plt.figure(figsize=(10, 6))
+            plt.plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}')
+            plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('ROC Curve')
+            plt.legend()
+            mlflow.log_figure(plt.gcf(), "roc_curve.png")
+            plt.close()
+
+            # -------------------------------------------------------------------------------------------------- #
+            # IMAGE GRAFIC: Precision-Recall Curve
+            plt.figure(figsize=(10, 6))
+            plt.plot(recall, precision, label=f'AP = {average_precision:.2f}')
+            plt.xlabel('Recall')
+            plt.ylabel('Precision')
+            plt.title('Precision-Recall Curve')
+            plt.legend()
+            mlflow.log_figure(plt.gcf(), "precision_recall_curve.png")
+            plt.close()
+
+            # # -------------------------------------------------------------------------------------------------- #
+            # # IMAGE GRAFIC: XGBoost Feature Importance
+            # fig, ax = plt.subplots(figsize=(16, 6))  # Tamanho personalizado
+            # xgb.plot_importance(model, max_num_features=20, ax=ax)
+            # yticklabels = [
+            #     features_name[int(f[1:])] if int(f[1:]) < len(features_name) else f
+            #     for f in model.get_booster().get_fscore().keys()
+            # ]
+            # ax.set_yticklabels(yticklabels)
+            # plt.title('XGBoost Feature Importance')
+            # mlflow.log_figure(plt.gcf(), "feature_importance.png")
+            # plt.close()
+
+            # -------------------------------------------------------------------------------------------------- #
+            # IMAGE GRAFIC: Learning Curve
+            plt.figure(figsize=(16, 6))
+            plt.plot(results['validation_0']['logloss'], label='Train')
+            plt.plot(results['validation_1']['logloss'], label='Validation')
+            plt.xlabel('Rounds')
+            plt.ylabel('Log Loss')
+            plt.title('Learning Curve')
+            plt.legend()
+            mlflow.log_figure(plt.gcf(), "learning_curve.png")
+            plt.close()
+
+            # -------------------------------------------------------------------------------------------------- #
+            # IMAGE GRAFIC: Confusion Matrix
+            fig, ax = plt.subplots(figsize=(10, 6))
+            disp = ConfusionMatrixDisplay.from_predictions(
+                y_true,
+                y_pred_threshold,
+                display_labels=["Não contratado", "Contratado"],
+                cmap="viridis",
+                values_format='d',
+                ax=ax
+            )
+            ax.set_title("Confusion Matrix")
+            mlflow.log_figure(fig, "confusion_matrix.png")
+            plt.close(fig)
+
+            # -------------------------------------------------------------------------------------------------- #
+            # IMAGE GRAFIC: Precision vs Recall x Threshold
+            plt.figure(figsize=(10, 6))
+            plt.plot(thresholds, precision[:-1], label='Precision')
+            plt.plot(thresholds, recall[:-1], label='Recall')
+            plt.xlabel('Threshold')
+            plt.ylabel('Score')
+            plt.title('Precision vs Recall x Threshold')
+            plt.legend()
+            plt.grid(True)
+            mlflow.log_figure(plt.gcf(), "precision_vs_recall_x_threshold.png")
+            plt.close()
 
             register_model(run_id)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            # X, y = load_features(f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/features_dataset.npz")
-
-            # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE_SPLIT, random_state=RANDOM_STATE, stratify=y)
-
-            # smote = SMOTE(random_state=RANDOM_STATE)
-            # X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
-
-            # model = train_model(X_train, y_train)
-            # evaluate_model(model, X_test, y_test)
-
-            # save_model(model, path=f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/model.pkl")
-
-
-
-
-
-
-
-
-
-
-
-
-            # model = load_model(path=f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/model.pkl")
-
-            # X, y = load_features(f"{os.path.join(BASE_DIR, '..', 'data', 'processed')}/features_dataset.npz")
-
-            # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE_SPLIT, random_state=RANDOM_STATE, stratify=y)
-
-            # # Gerar probabilidades
-            # y_proba = model.predict_proba(X_test)[:, 1]  # probabilidade da classe 1
-
-            # # Ajustar threshold (ex: 0.4)
-            # y_pred_threshold = (y_proba >= THRESHOLD).astype(int)
-
-            # # Avaliar
-            # print("Threshold:", THRESHOLD)
-            # print(classification_report(y_test, y_pred_threshold))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            # def lol1():
-            #     import matplotlib.pyplot as plt
-
-            #     precision, recall, thresholds = precision_recall_curve(y_test, probas)
-            #     print(precision)
-            #     print(recall)
-            #     print(thresholds)
-
-            #     plt.figure(figsize=(10, 6))
-            #     plt.plot(thresholds, precision[:-1], label='Precision')
-            #     plt.plot(thresholds, recall[:-1], label='Recall')
-            #     plt.xlabel('Threshold')
-            #     plt.ylabel('Score')
-            #     plt.title('Precision vs Recall x Threshold')
-            #     plt.legend()
-            #     plt.grid(True)
-            #     plt.savefig(f'./scatter_real_vs_pred.png')
-            #     plt.close()
-
-            # lol1()
+if __name__ == "__main__":
+    main()

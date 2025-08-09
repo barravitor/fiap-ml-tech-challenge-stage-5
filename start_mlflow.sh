@@ -1,6 +1,3 @@
-#!/bin/bash
-
-# Load .env
 set -a
 source .env
 set +a

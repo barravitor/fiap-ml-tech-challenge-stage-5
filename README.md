@@ -98,15 +98,16 @@ This will open the MLflow dashboard, where you can track experiments, models, an
 
 ### 🧠 3. Model Training
 
-Before running the training pipeline, make sure to create a folder named `data` in the root of the project and place inside it the 3 JSON files provided by **Decision**.
+Before running the training pipeline, make sure to create a folder named `data/raw` in the root of the project and place inside it the 3 JSON files provided by **Decision**.
 
 **Expected folder structure:**
 
 ```
 /data
- ├─ applicants.json
- ├─ prospects.json
- └─ vagas.json
+  └─ raw
+      ├─ applicants.json
+      ├─ prospects.json
+      └─ vagas.json
 ```
 
 To start the training process, run:
